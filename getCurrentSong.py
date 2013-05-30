@@ -4,6 +4,7 @@ import glib
 import copy
 import xmpp
 import json
+from googleChatStatus import GoogleChatHelper
 
 class MusicPlayerStatus:
     def __init__(self):
@@ -14,7 +15,23 @@ class MusicPlayerStatus:
         self.playerProps = None
         self.player = None
         self.currTrackStr = None
+        self.credentials = self.loadCredentials()
+        self.userName = self.credentials[0]
+        self.pwd = self.credentials[1]
+        self.gChatHelper = GoogleChatHelper(self.userName, self.pwd)
     
+    # load credentials
+    def loadCredentials(self):
+        credentialsFile = 'credentials_file'
+        cred = [line.strip() for line in open(credentialsFile)] 
+        return cred
+
+    #Change Google Chat Status
+    def changeGoogleChatStatus(self, newStatus):
+        newStatus = u'\u266a' + ' ' + newStatus + ' ' + u'\u266a'
+        self.debugLog('Setting new GMail Status to %s' % (newStatus))
+        self.gChatHelper.set_status(newStatus)
+
     # debug function 
     def debugLog(self, str):
         if(self.DEBUG):
@@ -49,7 +66,6 @@ class MusicPlayerStatus:
             initData['Metadata'] = initMetadata
             self.TrackChanged(initInterface, initData, [])
 
-
     # TrackChanged callback
     def TrackChanged(self, interface, data, sigArray):
         if 'Metadata' not in data:
@@ -77,6 +93,7 @@ class MusicPlayerStatus:
         if(newTrackStr != self.currTrackStr):
             self.currTrackStr = copy.deepcopy(newTrackStr)
             self.debugLog("Track Changed -> %s" % (self.currTrackStr))
+            self.changeGoogleChatStatus(self.currTrackStr)
         else:
             self.debugLog("Track didn't change, duplicate signal")
 
