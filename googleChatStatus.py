@@ -5,18 +5,26 @@
 import xmpp, sys
 
 class GoogleChatHelper():
-    def __init__(self, username, password):
+    def __init__(self, username):
         self.username = username
-        self.password = password
+        self.connSuccess = False
         self.jid = xmpp.protocol.JID(self.username)
-        self.connect()
  
-    def connect(self, debug=''):
+    def connect(self, passwd, debug=''):
         self.client = xmpp.Client(self.jid.getDomain(), debug=debug)
         if not self.client.connect(('gmail.com', 5223)):
-            raise IOError('Could not connect to server.')
-        if not self.client.auth(self.jid.getNode(), self.password):
-            raise IOError('Could not authenticate to server.')
+            print 'Could not connect to server.'
+            return
+
+        if not self.client.auth(self.jid.getNode(), passwd):
+            print 'Could not authenticate to server.'
+            return
+
+        self.connSuccess = True
+        
+
+    def isConnected(self):
+        return self.connSuccess
  
     def set_status(self, new_status):
         # Thanks to http://blog.thecybershadow.net/2010/05/08/setting-shared-google-talk-gmail-status-programmatically/

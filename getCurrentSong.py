@@ -4,32 +4,40 @@ import glib
 import copy
 import xmpp
 import json
+import sys
 from googleChatStatus import GoogleChatHelper
+import getpass
 
 class MusicPlayerStatus:
     def __init__(self):
-        self.DEBUG = 1       # debug flag
+        self.DEBUG = 0       # debug flag
         self.supportedMediaPlayers = ["guayadeque", "banshee", "rhythmbox", "clementine"] # Supported Media Players
         self.identity = None # player identity
         self.playerProxy = None
         self.playerProps = None
         self.player = None
         self.currTrackStr = None
-        self.credentials = self.loadCredentials()
-        self.userName = self.credentials[0]
-        self.pwd = self.credentials[1]
-        self.gChatHelper = GoogleChatHelper(self.userName, self.pwd)
+        self.login()
     
-    # load credentials
-    def loadCredentials(self):
-        credentialsFile = 'credentials_file'
-        cred = [line.strip() for line in open(credentialsFile)] 
-        return cred
-
+    def login(self):
+        
+        self.userName = raw_input('Username: ')
+        self.gChatHelper = GoogleChatHelper(self.userName)
+        tries = 1
+        while(not self.gChatHelper.isConnected()):
+            passwd = getpass.getpass('Password: ')
+            self.gChatHelper.connect(passwd)
+            tries += 1
+            if(tries > 3):
+                print "Max retries encountered, exiting"
+                sys.exit(1)
+         
     #Change Google Chat Status
+
     def changeGoogleChatStatus(self, newStatus):
         newStatus = u'\u266a' + ' ' + newStatus + ' ' + u'\u266a'
         self.debugLog('Setting new GMail Status to %s' % (newStatus))
+        print newStatus
         self.gChatHelper.set_status(newStatus)
 
     # debug function 
@@ -111,7 +119,7 @@ class MusicPlayerStatus:
 
     # connect to the bus
     def ConnectToBus(self):
-        print "ConnectToBus"
+        self.debugLog("ConnectToBus")
         DBusGMainLoop(set_as_default=True)
 
         self.bus = dbus.SessionBus()
