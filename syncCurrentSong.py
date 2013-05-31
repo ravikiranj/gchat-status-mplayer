@@ -11,7 +11,7 @@ import getpass
 class MusicPlayerStatus:
     def __init__(self):
         self.DEBUG = 0       # debug flag
-        self.supportedMediaPlayers = ["guayadeque", "banshee", "rhythmbox", "clementine"] # Supported Media Players
+        self.supportedMediaPlayers = ["amarok", "banshee", "clementine", "guayadeque", "rhythmbox"] # Supported Media Players
         self.identity = None # player identity
         self.playerProxy = None
         self.playerProps = None
@@ -19,8 +19,9 @@ class MusicPlayerStatus:
         self.currTrackStr = None
         self.login()
     
+    #Login
     def login(self):
-        
+        print "Please enter your GMail crendentials (the script doesn't store it)"
         self.userName = raw_input('Username: ')
         self.gChatHelper = GoogleChatHelper(self.userName)
         tries = 1
@@ -33,7 +34,6 @@ class MusicPlayerStatus:
                 sys.exit(1)
          
     #Change Google Chat Status
-
     def changeGoogleChatStatus(self, newStatus):
         newStatus = u'\u266a' + ' ' + newStatus + ' ' + u'\u266a'
         self.debugLog('Setting new GMail Status to %s' % (newStatus))
@@ -50,6 +50,7 @@ class MusicPlayerStatus:
         if(self.DEBUG):
             print json.dumps(data)
 
+    # main
     def main(self):
         self.ConnectToBus()
         self.mainloop = glib.MainLoop()
